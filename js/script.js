@@ -4,6 +4,8 @@ const username = "chaudhryna";
 const repoList = document.querySelector(".repo-list");
 const repoInformation = document.querySelector(".repos");
 const repoData = document.querySelector(".repo-data");
+const backToReposBtn = document.querySelector(".view-repos");
+const filterInput = document.querySelector(".filter-repos");
 
 const getUserData = async function () {
   const request = await fetch(
@@ -30,10 +32,11 @@ function displayUserData(data) {
     <p><strong>Number of public repos: </strong> ${data.public_repos}</p>
     </div> 
     `
-    overview.append(userInfo);  
+    overview.append(userInfo); 
+    getRepoData(username); 
 };
 
-const getRepoData = async function () {
+const getRepoData = async function (username) {
   const request = await fetch(
     `https://api.github.com/users/${username}/repos?sort=updated&&per_page=100`
   );
@@ -41,11 +44,12 @@ const getRepoData = async function () {
   repoDetail(repos);
 };
 
-getRepoData();
-
 function repoDetail(repos) {
-    for (let repo of repos) {
-        let repoItem = document.createElement("li");
+    filterInput.classList.remove("hide");
+
+    for (const repo of repos) {
+        const repoItem = document.createElement("li");
+        repoItem.classList.add("repo");
         repoItem.innerHTML = `
         <h3>${repo.name}</h3>
         `;
@@ -55,7 +59,7 @@ function repoDetail(repos) {
 
 repoList.addEventListener('click', function(e) {
     if (e.target.matches("h3")) {
-        const repoName = e.target.innerHTML;
+        const repoName = e.target.innerText;
         getSingleRepo(repoName);
     }
 });
@@ -94,4 +98,29 @@ function specificRepo(repoInfo, languages) {
 
     repoData.classList.remove("hide");
     repoInformation.classList.add("hide");
-}
+    backToReposBtn.classList.remove("hide");
+};
+
+backToReposBtn.addEventListener('click', function() {
+    repoData.classList.add("hide");
+    repoInformation.classList.remove("hide");
+    backToReposBtn.classList.add("hide");
+});
+
+filterInput.addEventListener('input', function(e) {
+    const searchInput = e.target.value;
+    const repos = document.querySelectorAll(".repo");
+    const searchFor = searchInput.toLowerCase();
+
+    console.log(repos);
+
+    for (const repo of repos) {
+        const targetRepo = repo.innerText.toLowerCase();
+        
+        if (targetRepo.includes(searchFor)) {
+            repo.classList.remove("hide");
+        } else {
+            repo.classList.add("hide");
+        }
+    }
+});
